@@ -31,6 +31,51 @@ const SEARCH_ENGINES: SearchEngine[] = [
   { name: "Yandex", url: "https://yandex.com/search/?text=", placeholder: "Search Yandex..." },
 ];
 
+const defaultShortcuts = [
+  {
+    "id": "b02b99fe-cb14-4c01-bc74-296a65adf8f6",
+    "title": "Instagram",
+    "url": "https://instagram.com",
+    "iconUrl": "https://www.google.com/s2/favicons?domain=instagram.com&sz=64"
+  },
+  {
+    "id": "43c421ab-b785-47bd-b4a0-3184762acdd3",
+    "title": "YouTube",
+    "url": "https://youtube.com",
+    "iconUrl": "https://www.google.com/s2/favicons?domain=youtube.com&sz=64"
+  },
+  {
+    "id": "22e4cdbc-5497-4f4a-8450-61d069abf4b9",
+    "title": "Slack",
+    "url": "https://slack.com",
+    "iconUrl": "https://www.google.com/s2/favicons?domain=slack.com&sz=64"
+  },
+  {
+    "id": "5b146159-ced0-41e1-95e3-558d98f6bc66",
+    "title": "Stardance",
+    "url": "https://stardance.hackclub.com",
+    "iconUrl": "https://www.google.com/s2/favicons?domain=stardance.hackclub.com&sz=64"
+  },
+  {
+    "id": "8e4a3e20-4131-4422-aa3a-697e08a59c34",
+    "title": "Gmail",
+    "url": "https://gmail.com",
+    "iconUrl": "https://ssl.gstatic.com/ui/v1/icons/mail/logo_loading_2x.png"
+  },
+  {
+    "id": "b9febde0-f06a-4e32-8ea9-9295aaf34f9f",
+    "title": "ChatGPT",
+    "url": "https://chatgpt.com",
+    "iconUrl": "https://www.google.com/s2/favicons?domain=chatgpt.com&sz=64"
+  },
+  {
+    "id": "241ce6e1-796f-44af-82df-e74f3d26556c",
+    "title": "Gemini",
+    "url": "https://gemini.google.com",
+    "iconUrl": "https://www.google.com/s2/favicons?domain=gemini.google.com&sz=64"
+  }
+]
+
 export default function Home() {
   const [wallpaperData, setWallpaperData] = useState<any>();
   const [wallpaperFetched, setWallpaperFetched] = useState<boolean>(false);
@@ -52,14 +97,21 @@ export default function Home() {
 
   useEffect(() => {
     const load = () => {
-      const stored = localStorage.getItem("frequentlyVisited");
-      setFrequentlyVisited(stored ? JSON.parse(stored) : []);
+      const stored = localStorage.getItem(STORAGE_KEY);
+
+      if (!stored) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultShortcuts));
+        setFrequentlyVisited(defaultShortcuts);
+        return;
+      }
+
+      setFrequentlyVisited(JSON.parse(stored));
     };
 
     load();
 
     const onStorage = (e: StorageEvent) => {
-      if (e.key === "frequentlyVisited") {
+      if (e.key === STORAGE_KEY) {
         load();
       }
     };
