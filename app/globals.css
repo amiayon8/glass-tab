@@ -1,26 +1,346 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
+@theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-varela);
   --font-mono: var(--font-geist-mono);
+  --color-border: var(--border);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  --background: #171717;
+  --foreground: #ffffff;
+  --border: rgba(255, 255, 255, 0, 25);
+}
+
+@layer base {
+  .glass {
+    @apply bg-white/10 backdrop-blur-sm border border-white/5 shadow-lg;
+  }
+
+  .glass-card {
+    @apply bg-white/10 backdrop-blur-sm border border-white/5 rounded-lg shadow-lg p-4;
+  }
+
+  .glass-navbar {
+    @apply bg-white/5 backdrop-blur-sm border-b border-white/5 shadow-lg rounded-b-2xl;
+  }
+
+  .app {
+    @apply relative p-2 rounded-xl cursor-pointer select-none;
+    @apply transition-all duration-150 ease-out;
+
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+
+    border: 1px solid rgba(255, 255, 255, 0.12);
+
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.12),
+      0 8px 32px rgba(0, 0, 0, 0.25);
+  }
+
+  .app::before,
+  .tooltip::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.18) 0%,
+      rgba(255, 255, 255, 0.08) 40%,
+      rgba(255, 255, 255, 0.03) 100%
+    );
+
+    opacity: 1;
+    transition: opacity 0.15s ease;
+  }
+
+  .app:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.22);
+
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.18),
+      0 12px 36px rgba(0, 0, 0, 0.35);
+
+    transform: translateY(-4px);
+  }
+
+  .app:hover::before {
+    opacity: 1;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.18) 0%,
+      rgba(255, 255, 255, 0.08) 40%,
+      rgba(255, 255, 255, 0.03) 100%
+    );
+  }
+
+  .app:active {
+    background: rgba(255, 255, 255, 0.16);
+    border-color: rgba(255, 255, 255, 0.28);
+
+    box-shadow:
+      inset 0 2px 6px rgba(0, 0, 0, 0.15),
+      0 4px 14px rgba(0, 0, 0, 0.2);
+
+    transform: scale(0.96);
+  }
+
+  .app:focus-visible {
+    outline: none;
+
+    border-color: rgb(96 165 250);
+
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.18),
+      0 0 0 2px rgba(96, 165, 250, 0.45),
+      0 10px 32px rgba(0, 0, 0, 0.3);
+  }
+
+  .app:disabled,
+  .app[aria-disabled="true"] {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
+
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.08);
+
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.05),
+      0 2px 8px rgba(0, 0, 0, 0.12);
+  }
+
+  .app svg {
+    @apply size-5;
+    transition:
+      transform 0.15s ease,
+      opacity 0.15s ease;
+  }
+
+  .app:hover svg {
+    transform: scale(1.05);
+  }
+
+  .app:active svg {
+    transform: scale(0.95);
+  }
+
+  .app::after {
+    content: "";
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%) scaleX(0);
+
+    width: 16px;
+    height: 3px;
+    border-radius: 9999px;
+
+    background: rgba(255, 255, 255, 0.45);
+    backdrop-filter: blur(8px);
+
+    transition:
+      transform 0.18s ease,
+      opacity 0.18s ease;
+
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .app.open::after {
+    transform: translateX(-50%) scaleX(1);
+    opacity: 1;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+button {
+  cursor: pointer;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background-color 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.calculator-container {
+  font-family: var(--font-sans), sans-serif;
+}
+
+.calc-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    0 4px 12px rgba(0, 0, 0, 0.15);
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  height: 52px;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+  cursor: pointer;
+}
+
+.calc-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 8px 20px rgba(0, 0, 0, 0.25);
+  transform: translateY(-2px);
+}
+
+.calc-btn:active {
+  transform: scale(0.92) translateY(0px);
+  transition-duration: 0.06s;
+}
+
+.calc-btn.sci {
+  height: 44px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+}
+
+.calc-btn.accent {
+  background: rgba(124, 58, 237, 0.12);
+  border-color: rgba(124, 58, 237, 0.25);
+  color: #a78bfa;
+}
+.calc-btn.accent:hover {
+  background: rgba(124, 58, 237, 0.22);
+  border-color: rgba(124, 58, 237, 0.4);
+}
+
+.calc-btn.active-toggle {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.4);
+  color: #60a5fa;
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.2);
+}
+
+.calc-btn.operator {
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.25);
+  color: #fbbf24;
+}
+.calc-btn.operator:hover {
+  background: rgba(245, 158, 11, 0.22);
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+.calc-btn.equals-btn {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  border-color: rgba(245, 158, 11, 0.4);
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 6px 16px rgba(217, 119, 6, 0.35);
+}
+.calc-btn.equals-btn:hover {
+  background: linear-gradient(135deg, #fbbf24 0%, #ea580c 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    0 10px 24px rgba(217, 119, 6, 0.5);
+}
+
+.calc-btn.wide {
+  grid-column: span 2;
+}
+
+.scientific-grid {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.calendar-cell {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+.calendar-cell:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.calendar-cell:active {
+  transform: scale(0.95) translateY(0px);
+  transition-duration: 0.06s;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.shimmer {
+  position: relative;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.shimmer::after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateX(-100%);
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.08) 20%,
+    rgba(255, 255, 255, 0.15) 60%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: shimmer 1.5s infinite;
+  content: "";
 }
