@@ -20,11 +20,11 @@ A browser new tab page based on clean glassmorphism UI, multiple selectable sear
 
 ## Built-in Apps
 
-- **Instagram:**
-- **YouTube:**
-- **Slack:**
-- **Stardance:**
-- **Gmail:**
+- **Instagram**
+- **YouTube**
+- **Slack**
+- **Stardance**
+- **Gmail**
 - **ChatGPT**
 - **Gemini**
 
