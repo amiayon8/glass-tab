@@ -7,6 +7,7 @@ A browser new tab page based on clean glassmorphism UI, multiple selectable sear
 - **NASA APOD Background**
 - **Clean glassmorphism UI**
 - **Selectable Search Engine**
+- **Selectable Wallpaper Provider**
 
 ## Search Engines
 
@@ -17,6 +18,11 @@ A browser new tab page based on clean glassmorphism UI, multiple selectable sear
 - **Ecosia**
 - **Baidu**
 - **Yandex**
+
+## Wallpaper Providers
+
+- **Bing**
+- **NASA APOD**
 
 ## Built-in Apps
 

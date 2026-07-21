@@ -21,6 +21,33 @@ type SearchEngine = {
   placeholder: string;
 };
 
+type BingData = {
+  images: {
+    startdate: string;
+    fullstartdate: string;
+    enddate: string;
+    url: string;
+    urlbase: string;
+    copyright: string;
+    copyrightlink: string;
+    title: string;
+    quiz: string;
+    wp: boolean;
+    hsh: string;
+    drk: number;
+    top: number;
+    bot: number;
+    hs: [];
+  }[];
+  tooltips: {
+    loading: string;
+    previous: string;
+    next: string;
+    walle: string;
+    walls: string;
+  }
+}
+
 const SEARCH_ENGINES: SearchEngine[] = [
   { name: "Google", url: "https://www.google.com/search?q=", placeholder: "Search Google..." },
   { name: "Bing", url: "https://www.bing.com/search?q=", placeholder: "Search Bing..." },
@@ -76,6 +103,10 @@ const defaultShortcuts = [
   }
 ]
 
+const wallpaperProviders = [
+  "NASA", "Bing",
+]
+
 export default function Home() {
   const [wallpaperData, setWallpaperData] = useState<any>();
   const [wallpaperFetched, setWallpaperFetched] = useState<boolean>(false);
@@ -89,6 +120,9 @@ export default function Home() {
     url: "",
     iconUrl: "",
   });
+  const [wallpaperProvider, setWallpaperProvider] = useState<string>(wallpaperProviders[0]);
+  const [wallpaperDropdownOpen, setWallpaperDropdownOpen] = useState<boolean>(false);
+
   const [editingSite, setEditingSite] = useState<FrequentlyVisited | null>(
     null,
   );
@@ -182,16 +216,26 @@ export default function Home() {
   useEffect(() => {
     const fetchWallpaper = async () => {
       try {
-        const wallpaperRes = await fetch("/nasa-feed");
-        setWallpaperData(await wallpaperRes.json());
+        const endpoint =
+          wallpaperProvider === "Bing" ? "/bing-wallpaper" : "/nasa-feed";
+
+        const res = await fetch(endpoint);
+
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+
+        const data = await res.json();
+
+        setWallpaperData(data);
         setWallpaperFetched(true);
       } catch (err) {
-        console.error("Failed to fetch wallpaper", err);
+        console.error("Failed to fetch wallpaper:", err);
       }
     };
 
     fetchWallpaper();
-  }, []);
+  }, [wallpaperProvider]);
 
   useEffect(() => {
     const storedEngineName = localStorage.getItem("searchEngine");
@@ -199,6 +243,16 @@ export default function Home() {
       const engine = SEARCH_ENGINES.find((e) => e.name === storedEngineName);
       if (engine) {
         setSelectedEngine(engine);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const storedWallpaperProvider = localStorage.getItem("wallpaperProvider");
+    if (storedWallpaperProvider) {
+      const provider = wallpaperProviders.find((e) => e === storedWallpaperProvider);
+      if (provider) {
+        setWallpaperProvider(provider);
       }
     }
   }, []);
@@ -295,7 +349,7 @@ export default function Home() {
             <p className="text-[11px] select-none">{site.title}</p>
           </div>
         ))}
-        {frequentlyVisited.length <= 9 && (
+        {frequentlyVisited.length <= 14 && (
           <div>
             <button
               onClick={() => setAddFrequentlyVisited(true)}
@@ -311,7 +365,7 @@ export default function Home() {
 
       {addFrequentyVisited && (
         <div className="top-28 right-5 z-50 absolute bg-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.35)] backdrop-blur-2xl border border-white/15 rounded-3xl w-96 transition-all duration-300">
-          <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-white/5 to-transparent rounded-t-3xl pointer-events-none" />
+          <div className="absolute inset-0 bg-linear-to-br from-white/20 via-white/5 to-transparent rounded-t-3xl pointer-events-none" />
 
           <div className="relative space-y-5 p-6">
             <div className="flex flex-row justify-between items-center gap-4">
@@ -344,7 +398,6 @@ export default function Home() {
                     const hostname = new URL(url).hostname;
                     iconUrl = `https://www.google.com/s2/favicons?domain=${hostname}&sz=64`;
                   } catch {
-                    // Invalid or incomplete URL
                   }
 
                   setAddSiteData((prev) => ({
@@ -415,7 +468,7 @@ export default function Home() {
 
       {editingSite && (
         <div className="top-28 right-5 z-50 absolute bg-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.35)] backdrop-blur-2xl border border-white/15 rounded-3xl w-96 transition-all duration-300">
-          <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-white/5 to-transparent rounded-t-3xl pointer-events-none" />
+          <div className="absolute inset-0 bg-linear-to-br from-white/20 via-white/5 to-transparent rounded-t-3xl pointer-events-none" />
 
           <div className="relative space-y-5 p-6">
             <div className="flex flex-row justify-between items-center gap-4">
@@ -448,7 +501,6 @@ export default function Home() {
                     const hostname = new URL(url).hostname;
                     iconUrl = `https://www.google.com/s2/favicons?domain=${hostname}&sz=64`;
                   } catch {
-                    // Invalid or incomplete URL
                   }
 
                   setEditingSite((prev) =>
@@ -524,7 +576,7 @@ export default function Home() {
       )}
       {customizing && (
         <div className="top-18 right-5 z-50 absolute bg-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.35)] backdrop-blur-2xl border border-white/15 rounded-3xl w-96 transition-all duration-300">
-          <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-white/5 to-transparent rounded-t-3xl pointer-events-none" />
+          <div className="absolute inset-0 bg-linear-to-br from-white/20 via-white/5 to-transparent rounded-t-3xl pointer-events-none" />
 
           <div className="relative space-y-5 p-6">
             <div className="flex flex-row justify-between items-center gap-4">
@@ -585,6 +637,49 @@ export default function Home() {
                   )}
                 </div>
               </div>
+
+              <div className="relative space-y-2">
+                <label className="block font-semibold text-white/70 text-xs uppercase tracking-wider">
+                  Wallpaper service
+                </label>
+                <div className="relative">
+                  <button
+                    onClick={() => setWallpaperDropdownOpen(!wallpaperDropdownOpen)}
+                    className="flex justify-between items-center bg-white/5 hover:bg-white/10 shadow-lg backdrop-blur-sm px-4 py-3 border border-white/15 focus:border-white/20 rounded-xl focus:outline-none w-full text-white text-sm text-left transition-all cursor-pointer"
+                  >
+                    <span>{wallpaperProvider}</span>
+                    <FaChevronDown className={`size-3.5 transition-transform duration-300 ${wallpaperDropdownOpen ? "rotate-180" : ""}`} />
+                  </button>
+
+                  {wallpaperDropdownOpen && (
+                    <>
+                      <div
+                        className="z-40 fixed inset-0 cursor-default"
+                        onClick={() => setWallpaperDropdownOpen(false)}
+                      />
+                      <div className="right-0 left-0 z-50 absolute bg-[#171717]/85 shadow-[0_12px_40px_rgba(0,0,0,0.5)] backdrop-blur-2xl mt-2 border border-white/15 rounded-2xl divide-y divide-white/5 max-h-60 overflow-y-auto no-scrollbar">
+                        {wallpaperProviders.map((provider) => (
+                          <button
+                            key={provider}
+                            onClick={() => {
+                              setWallpaperProvider(provider);
+                              localStorage.setItem("wallpaperProvider", provider);
+                              setWallpaperDropdownOpen(false);
+                            }}
+                            className={`w-full flex items-center justify-between px-4 py-3 text-white hover:bg-white/10 transition-colors text-sm text-left first:rounded-t-2xl last:rounded-b-2xl cursor-pointer ${wallpaperProvider === provider ? "bg-white/5 font-medium" : ""
+                              }`}
+                          >
+                            <span>{provider}</span>
+                            {wallpaperProvider === provider && (
+                              <span className="font-semibold text-blue-400 text-xs uppercase tracking-wider"><FaCheck /></span>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -599,7 +694,7 @@ export default function Home() {
       </button>
 
       <a
-        href="https://apod.nasa.gov/apod/"
+        href={wallpaperData?.link}
         target="_blank"
         className="right-5 bottom-5 fixed inset-shadow-sm flex flex-col justify-center items-end bg-white/5 hover:bg-white/10 backdrop-blur-sm px-4 py-2 border border-white/15 rounded-full text-white text-xs text-right hover:scale-105 transition-all duration-300"
       >

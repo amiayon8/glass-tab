@@ -1,33 +1,57 @@
-type APOD = Awaited<ReturnType<typeof fetchApod>>;
+type BingWallpaper = {
+    title: string;
+    copyright: string;
+    hdurl: string;
+    link: string;
+};
 
-let cache: APOD | null = null;
+let cache: BingWallpaper | null = null;
 let expiresAt = 0;
 
-async function fetchApod() {
-    const apiKey = process.env.NASA_API_KEY!;
+type BingData = {
+    images: {
+        startdate: string;
+        fullstartdate: string;
+        enddate: string;
+        url: string;
+        urlbase: string;
+        copyright: string;
+        copyrightlink: string;
+        title: string;
+        quiz: string;
+        wp: boolean;
+        hsh: string;
+        drk: number;
+        top: number;
+        bot: number;
+        hs: [];
+    }[];
+};
 
+async function fetchBing(): Promise<BingWallpaper> {
     const res = await fetch(
-        `https://api.nasa.gov/planetary/apod?api_key=${apiKey}`,
+        "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1",
         {
             cache: "no-store",
         }
     );
 
     if (!res.ok) {
-        throw new Error(`NASA API returned ${res.status}`);
+        throw new Error(`Bing API returned ${res.status}`);
     }
 
-    const data = await res.json();
+    const data: BingData = await res.json();
 
-    if ("error" in data) {
-        throw new Error(data.error.message);
-    }
+    const image = data.images[0];
 
     return {
-        ...data,
-        link: `https://apod.nasa.gov/apod/ap${data.date.replace(/-/g, "").slice(2)}.html`,
+        title: image.title,
+        copyright: image.copyright,
+        hdurl: `https://www.bing.com${image.url}`,
+        link: `${image.copyrightlink}`,
     };
 }
+
 function getNextMidnightET() {
     const now = new Date();
 
@@ -67,22 +91,17 @@ function getNextMidnightET() {
     }
 }
 
-export async function getCachedData() {
+export async function getCachedData(): Promise<BingWallpaper> {
     const now = Date.now();
 
     if (!cache || now >= expiresAt) {
         try {
-            const fresh = await fetchApod();
-
-            cache = fresh;
-            expiresAt = Number(getNextMidnightET());
+            cache = await fetchBing();
+            expiresAt = getNextMidnightET();
         } catch (err) {
-            console.error("Failed to refresh APOD cache:", err);
+            console.error("Failed to refresh Bing cache:", err);
 
-            if (cache) {
-                return cache;
-            }
-
+            if (cache) return cache;
             throw err;
         }
     }
