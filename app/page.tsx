@@ -129,6 +129,8 @@ export default function Home() {
   const [selectedEngine, setSelectedEngine] = useState<SearchEngine>(SEARCH_ENGINES[0]);
   const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
 
+  const [openLinksInNewTab, setOpenLinksInNewTab] = useState<boolean>(false);
+
   useEffect(() => {
     const load = () => {
       const stored = localStorage.getItem(STORAGE_KEY);
@@ -257,6 +259,15 @@ export default function Home() {
     }
   }, []);
 
+
+  useEffect(() => {
+    const stored = localStorage.getItem("openLinksInNewTab");
+
+    if (stored !== null) {
+      setOpenLinksInNewTab(stored === "true");
+    }
+  }, []);
+
   const handleSearch = () => {
     if (searchQuery.trim() !== "") {
       window.location.href = `${selectedEngine.url}${encodeURIComponent(searchQuery)}`;
@@ -315,7 +326,7 @@ export default function Home() {
           >
             <a
               href={site.url}
-              target="_blank"
+              target={openLinksInNewTab ? "_blank" : ""}
               className="group relative flex flex-col justify-center items-center gap-1 bg-white/5 hover:bg-white/10 shadow-lg backdrop-blur-sm border border-white/15 rounded-2xl size-12 text-gray-200 hover:text-white hover:scale-103 transition-all duration-300"
             >
               {site.iconUrl && (
@@ -679,6 +690,27 @@ export default function Home() {
                     </>
                   )}
                 </div>
+              </div>
+
+              <div className="flex flex-row flex-wrap justify-between items-center leading-none">
+                <label className="block font-semibold text-white/70 text-xs uppercase tracking-wider">
+                  Open links in new tab
+                </label>
+
+                <button
+                  onClick={() => {
+                    const value = !openLinksInNewTab;
+                    setOpenLinksInNewTab(value);
+                    localStorage.setItem("openLinksInNewTab", String(value));
+                  }}
+                  className={`relative flex items-center w-10 h-6 rounded-full transition-colors cursor-pointer ${openLinksInNewTab ? "bg-blue-500" : "bg-white/10"
+                    }`}
+                >
+                  <span
+                    className={`absolute size-4 bg-white rounded-full transition-transform ${openLinksInNewTab ? "translate-x-5" : "translate-x-1"
+                      }`}
+                  />
+                </button>
               </div>
             </div>
           </div>
