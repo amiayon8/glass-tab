@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "GlassTab - Custom New Tab Page",
+  title: "GlassTab - New Tab",
   description: "A fast, beautiful, customizable glassmorphism new tab page.",
 };
 
