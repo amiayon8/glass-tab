@@ -1,15 +1,27 @@
-type APOD = Awaited<ReturnType<typeof fetchApod>>;
+import { cacheLife, cacheTag } from "next/cache";
 
-let cache: APOD | null = null;
+type APOD = {
+    date: string;
+    explanation?: string;
+    hdurl?: string;
+    media_type?: string;
+    service_version?: string;
+    title: string;
+    url?: string;
+    copyright?: string;
+    link: string;
+};
+
+let memoryCache: APOD | null = null;
 let expiresAt = 0;
 
-async function fetchApod() {
-    const apiKey = process.env.NASA_API_KEY!;
+async function fetchApod(): Promise<APOD> {
+    const apiKey = process.env.NASA_API_KEY || "DEMO_KEY";
 
     const res = await fetch(
         `https://api.nasa.gov/planetary/apod?api_key=${apiKey}`,
         {
-            cache: "no-store",
+            next: { revalidate: 3600 },
         }
     );
 
@@ -23,11 +35,16 @@ async function fetchApod() {
         throw new Error(data.error.message);
     }
 
+    const dateStr = data.date || new Date().toISOString().split("T")[0];
+    const link = `https://apod.nasa.gov/apod/ap${dateStr.replace(/-/g, "").slice(2)}.html`;
+
     return {
         ...data,
-        link: `https://apod.nasa.gov/apod/ap${data.date.replace(/-/g, "").slice(2)}.html`,
+        hdurl: data.hdurl || data.url,
+        link,
     };
 }
+
 function getNextMidnightET() {
     const now = new Date();
 
@@ -67,25 +84,26 @@ function getNextMidnightET() {
     }
 }
 
-export async function getCachedData() {
+export async function getCachedData(): Promise<APOD> {
+    "use cache";
+    cacheLife("hours");
+    cacheTag("nasa-apod");
+
     const now = Date.now();
 
-    if (!cache || now >= expiresAt) {
+    if (!memoryCache || now >= expiresAt) {
         try {
             const fresh = await fetchApod();
-
-            cache = fresh;
+            memoryCache = fresh;
             expiresAt = Number(getNextMidnightET());
         } catch (err) {
             console.error("Failed to refresh APOD cache:", err);
-
-            if (cache) {
-                return cache;
+            if (memoryCache) {
+                return memoryCache;
             }
-
             throw err;
         }
     }
 
-    return cache;
+    return memoryCache;
 }

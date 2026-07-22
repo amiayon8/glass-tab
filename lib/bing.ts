@@ -1,3 +1,5 @@
+import { cacheLife, cacheTag } from "next/cache";
+
 type BingWallpaper = {
     title: string;
     copyright: string;
@@ -5,7 +7,7 @@ type BingWallpaper = {
     link: string;
 };
 
-let cache: BingWallpaper | null = null;
+let memoryCache: BingWallpaper | null = null;
 let expiresAt = 0;
 
 type BingData = {
@@ -32,7 +34,7 @@ async function fetchBing(): Promise<BingWallpaper> {
     const res = await fetch(
         "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1",
         {
-            cache: "no-store",
+            next: { revalidate: 3600 },
         }
     );
 
@@ -41,7 +43,6 @@ async function fetchBing(): Promise<BingWallpaper> {
     }
 
     const data: BingData = await res.json();
-
     const image = data.images[0];
 
     return {
@@ -92,19 +93,22 @@ function getNextMidnightET() {
 }
 
 export async function getCachedData(): Promise<BingWallpaper> {
+    "use cache";
+    cacheLife("hours");
+    cacheTag("bing-wallpaper");
+
     const now = Date.now();
 
-    if (!cache || now >= expiresAt) {
+    if (!memoryCache || now >= expiresAt) {
         try {
-            cache = await fetchBing();
+            memoryCache = await fetchBing();
             expiresAt = getNextMidnightET();
         } catch (err) {
             console.error("Failed to refresh Bing cache:", err);
-
-            if (cache) return cache;
+            if (memoryCache) return memoryCache;
             throw err;
         }
     }
 
-    return cache;
+    return memoryCache;
 }
